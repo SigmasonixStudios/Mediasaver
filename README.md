@@ -70,6 +70,7 @@ Runs downloads in a background thread to keep the UI responsive
 
 Provides real‑time progress updates via yt‑dlp hooks
 
+I don't intent to make an EXE file for this. its easier to update the script. 
 
 
 📄 License
