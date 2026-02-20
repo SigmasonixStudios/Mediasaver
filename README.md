@@ -35,6 +35,7 @@ Open Command Prompt and run:
 
 Code
 pip install -U yt-dlp
+
 3. Install FFmpeg (required for MP3 + merging)
 Download FFmpeg from:
 https://www.gyan.dev/ffmpeg/builds/
@@ -44,16 +45,10 @@ Extract it, then add the bin folder to your Windows PATH.
 4. Run the App
 Download or clone this repository:
 
-Code
-git clone https://github.com/SigmasonixStudios/yt-dlp_gui
-Run:
+You can rename to a .pyw file for a one click GUI 
 
-Code
-python yt_dlp_gui.py
-Or double‑click the .pyw file if you packaged it.
+If you are stuck like I once did. ask an AI or youtube on how to add things to path.
 
-🖼️ Screenshots
-(Add your screenshots here once you upload them to the repo)
 
 🧠 How It Works
 This GUI wraps yt‑dlp and exposes the most useful features:
@@ -70,49 +65,13 @@ Runs downloads in a background thread to keep the UI responsive
 
 Provides real‑time progress updates via yt‑dlp hooks
 
-⚙️ Advanced Options
-Filename Template
-You can combine:
 
-Option	Template
-Title	%(title)s
-Uploader	%(uploader)s
-Upload Date	%(upload_date)s
-Video ID	%(id)s
-Playlist Index	%(playlist_index)s
-Example output:
-
-Code
-%(uploader)s - %(title)s - %(upload_date)s.%(ext)s
-❗ Troubleshooting
-Most issues come from outdated yt‑dlp.
-
-Update yt‑dlp
-Code
-pip install -U yt-dlp
-Common Errors
-“Unable to extract uploader id”
-
-“Signature extraction failed”
-
-“HTTP Error 403”
-
-“No formats available”
-
-These almost always mean YouTube changed something → update yt‑dlp.
-
-Other checks
-Ensure FFmpeg is installed and in PATH
-
-Try a different URL (private/age‑restricted videos fail)
-
-Check your internet connection
-
-If stuck, search the exact error message + “yt‑dlp”
 
 📄 License
-MIT License (or whichever you choose)
+MIT License
+(Free and do whatever you want)
 
 👤 Author
 SigmaSonix Labs  
+
 Built with Python + yt‑dlp
