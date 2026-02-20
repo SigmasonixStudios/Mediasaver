@@ -1,4 +1,5 @@
 Web Media Downloader (yt‑dlp GUI)
+
 A fast, simple, and powerful GUI for yt‑dlp, supporting 1500+ websites.
 Download audio, video, playlists, and more — without touching the command line.
 
@@ -24,19 +25,23 @@ Download audio, video, playlists, and more — without touching the command line
 ✔️ Works with 1500+ sites supported by yt‑dlp
 
 📥 Installation
+
 1. Install Python
+   
 Download Python 3.10+ from:
 https://www.python.org/downloads/
 
 Make sure to check “Add Python to PATH” during installation.
 
 2. Install yt‑dlp
+   
 Open Command Prompt and run:
 
-Code
+Code: 
 pip install -U yt-dlp
 
 3. Install FFmpeg (required for MP3 + merging)
+   
 Download FFmpeg from:
 https://www.gyan.dev/ffmpeg/builds/
 
@@ -72,6 +77,6 @@ MIT License
 (Free and do whatever you want)
 
 👤 Author
-SigmaSonix Labs  
+SigmaSonixStudios
 
 Built with Python + yt‑dlp
