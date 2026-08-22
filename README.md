@@ -10,6 +10,10 @@ Download audio, video, playlists, and more — without touching the command line
 
 ✔️ Metadata embedding (thumbnail, metadata, subtitles when available)
 
+✔️ Optional browser cookies or cookies.txt support for 403 / sign-in issues
+
+✔️ YouTube fallback client selector for stubborn 403 errors
+
 ✔️ Quality selector (best, 1080p, 720p, 480p, 360p)
 
 ✔️ Supports multiple URLs (one per line or comma‑separated)
@@ -54,6 +58,37 @@ You can rename to a .pyw file for a one click GUI
 
 If you are stuck like I once did. ask an AI or youtube on how to add things to path.
 
+🍪 Fixing Cookie / HTTP 403 Errors
+
+Some sites, especially YouTube, may block anonymous downloads or require cookies
+from a signed-in browser session.
+
+Try these in order:
+
+1. Update yt-dlp:
+
+Code:
+pip install -U yt-dlp
+
+2. Restart the app.
+
+3. In the app, tick "Use cookies from browser" and choose the browser where you
+   are already signed in.
+
+4. If that fails because the browser cookie database is locked, close the browser
+   and try again.
+
+5. If you run the app on a different machine than your browser, export a
+   cookies.txt file from the browser machine and select that file in the app.
+
+6. Try the YouTube fallback dropdown:
+
+   - Start with Auto
+   - Try Default + web embedded for cookie/sign-in problems
+   - Try Web embedded only if the first fallback still gives 403
+
+Note: only download content you have the right to access and keep.
+
 
 🧠 How It Works
 This GUI wraps yt‑dlp and exposes the most useful features:
@@ -65,6 +100,10 @@ Maps friendly download modes to yt‑dlp format strings
 Uses FFmpeg post‑processors for MP3 extraction
 
 Embeds metadata, thumbnails, and subtitles when available
+
+Can pass browser cookies or a cookies.txt file to yt-dlp
+
+Can switch YouTube player clients when a site-side 403 workaround changes
 
 Runs downloads in a background thread to keep the UI responsive
 
