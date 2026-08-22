@@ -10,8 +10,8 @@ import os
 class YTDLP_GUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Web Mdedia Downloader V260215")
-        self.root.geometry("640x720")
+        self.root.title("Wet Media Downloader V26.08.21")
+        self.root.geometry("700x900")
         self.root.resizable(True, True)
 
         self.download_thread = None
@@ -21,6 +21,12 @@ class YTDLP_GUI:
         self.embed_metadata_var = tk.BooleanVar(value=True)
         self.embed_thumbnail_var = tk.BooleanVar(value=True)
         self.embed_subs_var = tk.BooleanVar(value=False)
+
+        # Access / anti-bot options
+        self.use_browser_cookies_var = tk.BooleanVar(value=False)
+        self.browser_var = tk.StringVar(value="chrome")
+        self.cookie_file_var = tk.StringVar(value="")
+        self.youtube_client_var = tk.StringVar(value="Auto")
 
         # Filename checkbox variables
         self.chk_title_var = tk.BooleanVar(value=True)
@@ -114,19 +120,59 @@ class YTDLP_GUI:
         tk.Checkbutton(frame_meta, text="Embed thumbnail (cover art)", variable=self.embed_thumbnail_var).pack(anchor="w")
         tk.Checkbutton(frame_meta, text="Embed subtitles", variable=self.embed_subs_var).pack(anchor="w")
 
+        # -- Cookies / Access Options ---------------------------------------
+        frame_access = tk.LabelFrame(self.root, text="Cookies / 403 Fixes", padx=10, pady=8)
+        frame_access.pack(fill="x", padx=10, pady=10)
+
+        row_browser = tk.Frame(frame_access)
+        row_browser.pack(fill="x", pady=3)
+        tk.Checkbutton(row_browser, text="Use cookies from browser", variable=self.use_browser_cookies_var).pack(side="left")
+        self.browser_combo = ttk.Combobox(
+            row_browser,
+            textvariable=self.browser_var,
+            values=["chrome", "edge", "firefox", "brave", "chromium", "opera", "vivaldi"],
+            state="readonly",
+            width=12,
+        )
+        self.browser_combo.pack(side="left", padx=8)
+
+        row_cookie_file = tk.Frame(frame_access)
+        row_cookie_file.pack(fill="x", pady=3)
+        tk.Label(row_cookie_file, text="cookies.txt file:").pack(side="left")
+        tk.Entry(row_cookie_file, textvariable=self.cookie_file_var, width=48).pack(side="left", padx=8, fill="x", expand=True)
+        tk.Button(row_cookie_file, text="Browse...", command=self.browse_cookie_file).pack(side="left")
+
+        row_youtube_client = tk.Frame(frame_access)
+        row_youtube_client.pack(fill="x", pady=3)
+        tk.Label(row_youtube_client, text="YouTube fallback:").pack(side="left")
+        self.youtube_client_combo = ttk.Combobox(
+            row_youtube_client,
+            textvariable=self.youtube_client_var,
+            values=[
+                "Auto",
+                "Default + web embedded",
+                "Web embedded only",
+                "iOS only",
+                "Android only",
+            ],
+            state="readonly",
+            width=24,
+        )
+        self.youtube_client_combo.pack(side="left", padx=8)
+
         # Initial state
         self.toggle_options(None)
 
         # ── Status & Progress ────────────────────────────────────
         self.status_var = tk.StringVar(value="Ready")
-        tk.Label(self.root, textvariable=self.status_var, fg="blue", wraplength=750).pack(pady=12)
+        tk.Label(self.root, textvariable=self.status_var, fg="blue", wraplength=750).pack(pady=8)
 
         self.progress_var = tk.StringVar(value="")
         tk.Label(self.root, textvariable=self.progress_var, font=("Arial", 10)).pack()
 
         # ── Buttons 
         btn_frame = tk.Frame(self.root)
-        btn_frame.pack(pady=20)
+        btn_frame.pack(pady=10)
 
         self.download_btn = tk.Button(btn_frame, text="Download", command=self.start_download, width=15, bg="#4CAF50", fg="white")
         self.download_btn.pack(side="left", padx=25)
@@ -180,6 +226,14 @@ class YTDLP_GUI:
         folder = filedialog.askdirectory()
         if folder:
             self.folder_var.set(folder)
+
+    def browse_cookie_file(self):
+        cookie_file = filedialog.askopenfilename(
+            title="Select cookies.txt",
+            filetypes=[("Cookie files", "*.txt *.cookies"), ("All files", "*.*")]
+        )
+        if cookie_file:
+            self.cookie_file_var.set(cookie_file)
 
     def progress_hook(self, d):
         if self.stop_event.is_set():
@@ -246,7 +300,34 @@ class YTDLP_GUI:
             'continuedl': True,
             'quiet': False,
             'no_warnings': False,
+            'retries': 10,
+            'fragment_retries': 10,
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+            },
         }
+
+        cookie_file = self.cookie_file_var.get().strip()
+        if cookie_file:
+            if not os.path.isfile(cookie_file):
+                self.status_var.set("Cookie file was selected, but the file does not exist.")
+                self.progress_var.set("")
+                return
+            ydl_opts['cookiefile'] = cookie_file
+        elif self.use_browser_cookies_var.get():
+            ydl_opts['cookiesfrombrowser'] = (self.browser_var.get(),)
+
+        youtube_client_map = {
+            "Default + web embedded": ['default', 'web_embedded'],
+            "Web embedded only": ['web_embedded'],
+            "iOS only": ['ios'],
+            "Android only": ['android'],
+        }
+        selected_clients = youtube_client_map.get(self.youtube_client_var.get())
+        if selected_clients:
+            ydl_opts['extractor_args'] = {'youtube': {'player_client': selected_clients}}
+        elif cookie_file or self.use_browser_cookies_var.get():
+            ydl_opts['extractor_args'] = {'youtube': {'player_client': ['default', 'web_embedded']}}
 
         if self.embed_metadata_var.get():
             ydl_opts['embedmetadata'] = True
@@ -273,7 +354,13 @@ class YTDLP_GUI:
             except yt_dlp.utils.DownloadCancelled:
                 self.status_var.set("Download cancelled by user.")
             except Exception as e:
-                self.status_var.set(f"Error: {str(e)}")
+                message = str(e)
+                if "403" in message or "Forbidden" in message or "cookie" in message.lower():
+                    message = (
+                        f"{message} | Try updating yt-dlp. If it still fails, try "
+                        "YouTube fallback: Default + web embedded, then Web embedded only."
+                    )
+                self.status_var.set(f"Error: {message}")
                 
             finally:
                 self.download_btn.config(state="normal")
@@ -307,15 +394,17 @@ This downloader uses yt-dlp
 
 Work with over over 1500 webistes
 
-Most problems happen because YouTube frequently changes its website.
+Most problems happen because YouTube frequently changes its website or blocks
+anonymous downloads.
 When that happens, downloads fail with errors like:
 • "Unable to extract uploader id"
 • "Signature extraction failed"
 • "HTTP Error 403"
+• Cookie-related errors
 • No formats available
 • Or just "download failed"
 
-you need to Update yt-dlp:
+First, update yt-dlp:
 
 1. Open Command Prompt (search "cmd" in Windows Start menu)
 2. Type this command and press Enter:
@@ -327,6 +416,13 @@ you need to Update yt-dlp:
 
 3. Wait until it says "Successfully installed..." or "Requirement already satisfied"
 4. Close and restart this program (double-click your .bat or .pyw file again)
+
+If the error says cookie, sign in, bot check, or HTTP Error 403:
+• Tick "Use cookies from browser" and select the browser where you are signed in
+• Close that browser before downloading if yt-dlp says the cookie database is locked
+• Or export cookies to a cookies.txt file and select it in this app
+• Try YouTube fallback: Default + web embedded
+• If it still 403s, try YouTube fallback: Web embedded only
 
 Other quick checks:
 • Make sure ffmpeg is installed (needed for MP3 conversion and merging video+audio)
